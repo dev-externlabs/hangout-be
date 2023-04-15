@@ -14,6 +14,8 @@ router.post('/forgot-password', validate(authValidation.forgotPassword), authCon
 router.post('/reset-password', validate(authValidation.resetPassword), authController.resetPassword);
 router.post('/send-verification-email', auth(), authController.sendVerificationEmail);
 router.post('/verify-email', validate(authValidation.verifyEmail), authController.verifyEmail);
+router.post('/sent-fcm-to-topic', authController.sendNotifyToSub);
+router.get('/activities', authController.getActivities);
 
 module.exports = router;
 
@@ -38,14 +40,17 @@ module.exports = router;
  *             type: object
  *             required:
  *               - name
- *               - email
+ *               - number
  *               - password
+ *               - gender
  *             properties:
  *               name:
  *                 type: string
- *               email:
+ *               number:
  *                 type: string
- *                 format: email
+ *                 description: must be unique
+ *               gender:
+ *                 type: string
  *                 description: must be unique
  *               password:
  *                 type: string
@@ -54,7 +59,8 @@ module.exports = router;
  *                 description: At least one number and one letter
  *             example:
  *               name: fake name
- *               email: fake@example.com
+ *               number: '7728856350'
+ *               gender: male
  *               password: password1
  *     responses:
  *       "201":
@@ -74,9 +80,9 @@ module.exports = router;
 
 /**
  * @swagger
- * /auth/login:
+ * /auth/sent-fcm-to-topic:
  *   post:
- *     summary: Login
+ *     summary: sent-fcm-to-topic
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -85,39 +91,25 @@ module.exports = router;
  *           schema:
  *             type: object
  *             required:
- *               - email
- *               - password
+ *               - latitude
+ *               - longitude
+ *               - title
+ *               - body
  *             properties:
- *               email:
+ *               latitude:
  *                 type: string
- *                 format: email
- *               password:
+ *               longitude:
  *                 type: string
- *                 format: password
+ *               title:
+ *                 type: string
+ *               body:
+ *                 type: string
  *             example:
- *               email: fake@example.com
- *               password: password1
- *     responses:
- *       "200":
- *         description: OK
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 user:
- *                   $ref: '#/components/schemas/User'
- *                 tokens:
- *                   $ref: '#/components/schemas/AuthTokens'
- *       "401":
- *         description: Invalid email or password
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *             example:
- *               code: 401
- *               message: Invalid email or password
+ *               latitude: '26.836769'
+ *               longitude: '75.834102'
+ *               title: Play
+ *               body: Cricket match at Nehru Garden at 4:00
+ *
  */
 
 /**
@@ -288,4 +280,52 @@ module.exports = router;
  *             example:
  *               code: 401
  *               message: verify email failed
+ */
+
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Login
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - number
+ *               - password
+ *             properties:
+ *               number:
+ *                 type: string
+ *                 format: number
+ *               password:
+ *                 type: string
+ *                 format: password
+ *             example:
+ *               number: '7728856350'
+ *               password: password1
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *                 tokens:
+ *                   $ref: '#/components/schemas/AuthTokens'
+ *       "401":
+ *         description: Invalid email or password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 401
+ *               message: Invalid email or password
  */

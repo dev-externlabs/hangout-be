@@ -1,6 +1,6 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
-const { authService, userService, tokenService, emailService } = require('../services');
+const { authService, userService, tokenService, emailService, fcmService, activityService } = require('../services');
 
 const register = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
@@ -47,6 +47,25 @@ const verifyEmail = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const sendNotifyToSub = catchAsync(async (req, res) => {
+  const result = await fcmService.sendToTopic(req.body, req.headers.userid);
+  const activityBody = {
+    title: req.body.title,
+    message: req.body.body,
+    longitude: req.body.longitude,
+    latitude: req.body.latitude,
+    createdBy: req.headers.userid,
+    reacts: 0,
+  };
+  const activityResponse = await activityService.createActivity(activityBody);
+  res.status(200).send({ result, activityResponse });
+});
+
+const getActivities = catchAsync(async (req, res) => {
+  const activityResponse = await activityService.getActivity();
+  res.status(200).send({ activityResponse });
+});
+
 module.exports = {
   register,
   login,
@@ -56,4 +75,6 @@ module.exports = {
   resetPassword,
   sendVerificationEmail,
   verifyEmail,
+  sendNotifyToSub,
+  getActivities,
 };
